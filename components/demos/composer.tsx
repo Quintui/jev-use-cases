@@ -161,14 +161,11 @@ export function Composer() {
   }
 
   return (
-    <div className={cn("grid gap-6", showProbabilities && "lg:grid-cols-[1fr_20rem]")}>
+    <div className={cn("grid items-start gap-6", showProbabilities && "lg:grid-cols-[1fr_20rem]")}>
       <Card>
         <CardHeader>
           <CardTitle>Composer with a mode picker</CardTitle>
-          <CardDescription>
-            Jev reads the draft as you type. The mode never changes on its
-            own. At most you get a chip, and only when Jev is confident.
-          </CardDescription>
+          <CardDescription>The mode never changes on its own. At most you get a chip.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <form

@@ -44,7 +44,7 @@ export default function RootLayout({
                   <AppSidebar />
                   <SidebarInset>
                     <AppHeader />
-                    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 p-6 md:p-10">
+                    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-4 md:px-8 md:py-6">
                       {children}
                     </main>
                   </SidebarInset>

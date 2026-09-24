@@ -59,11 +59,13 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller"
-import { Progress, ProgressLabel } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DebugOnly, JevMeta, TierBadge } from "@/components/jev/indicators"
 import { useJevAction, type JevResult } from "@/hooks/use-jev"
 import { TIERS, formatPercent, noulOf, scoreOf } from "@/lib/jev/tiers"
+import { cn } from "@/lib/utils"
 
 const GAME = "Elden Ring"
 const STREAMER = "mira_plays"
@@ -239,17 +241,17 @@ export function Moderation() {
     setNewRule("")
   }
 
+  const panelHeight = "h-[max(18rem,calc(100svh-24.5rem))]"
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_22rem]">
-      <Card className="min-w-0">
+    <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <Card size="sm" className="min-w-0">
         <CardHeader>
           <CardTitle>
             {STREAMER} · {GAME}
           </CardTitle>
           <CardDescription>
-            Messages are grouped into {WINDOW_MS / 1000} s windows, and each
-            window is one Jev call. That&apos;s {questionsPerMessage} questions
-            per message.
+            One Jev call per {WINDOW_MS / 1000} s window · {questionsPerMessage} questions per message
           </CardDescription>
           <CardAction>
             <Button variant={playing ? "secondary" : "default"} onClick={() => setPlaying((p) => !p)}>
@@ -260,7 +262,7 @@ export function Moderation() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <MessageScrollerProvider autoScroll>
-            <MessageScroller className="h-[28rem] rounded-2xl bg-muted/50">
+            <MessageScroller className={cn(panelHeight, "rounded-2xl bg-muted/50")}>
               <MessageScrollerViewport>
                 <MessageScrollerContent className="gap-3 p-4">
                   {messages.length === 0 && (
@@ -303,115 +305,101 @@ export function Moderation() {
             </InputGroup>
           </form>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-wrap justify-between gap-2">
           <JevMeta result={last} />
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {perMinute} / {RATE_LIMIT.toLocaleString()} calls/min · {avgBatch.toFixed(1)} msgs per call
+          </span>
         </CardFooter>
       </Card>
 
-      <div className="flex min-w-0 flex-col gap-6">
-        <Card size="sm">
+      <Card size="sm" className="min-w-0">
+        <Tabs defaultValue="queue" className="gap-3">
           <CardHeader>
-            <CardTitle>Held for mod review</CardTitle>
-            <CardDescription>Medium confidence goes to a human.</CardDescription>
+            <TabsList className="w-full">
+              <TabsTrigger value="queue">
+                Mod queue
+                {held.length > 0 && <Badge variant="secondary">{held.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="rules">Rules</TabsTrigger>
+            </TabsList>
           </CardHeader>
           <CardContent>
-            {held.length === 0 ? (
-              <Empty className="py-6">
-                <EmptyHeader>
-                  <EmptyTitle>Queue is empty</EmptyTitle>
-                  <EmptyDescription>Nothing uncertain right now.</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <ItemGroup className="gap-2">
-                {held.map((message) => (
-                  <Item key={message.id} size="xs" variant="outline">
-                    <ItemContent>
-                      <ItemTitle>{message.user}</ItemTitle>
-                      <ItemDescription className="line-clamp-2">{message.text}</ItemDescription>
-                      <DebugOnly>
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {message.reason} {formatPercent(message.probability ?? 0)}
-                        </span>
-                      </DebugOnly>
-                    </ItemContent>
-                    <ItemActions>
-                      <Button size="icon-xs" variant="outline" aria-label="Approve" onClick={() => setStatus(message.id, "approved")}>
-                        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
-                      </Button>
-                      <Button size="icon-xs" variant="destructive" aria-label="Remove" onClick={() => setStatus(message.id, "removed")}>
-                        <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-                      </Button>
-                    </ItemActions>
-                  </Item>
-                ))}
-              </ItemGroup>
-            )}
+            <TabsContent value="queue">
+              <ScrollArea className={panelHeight}>
+                {held.length === 0 ? (
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyTitle>Queue is empty</EmptyTitle>
+                      <EmptyDescription>Medium-confidence messages wait here for a human.</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                ) : (
+                  <ItemGroup className="gap-2">
+                    {held.map((message) => (
+                      <Item key={message.id} size="xs" variant="outline">
+                        <ItemContent>
+                          <ItemTitle>{message.user}</ItemTitle>
+                          <ItemDescription className="line-clamp-2">{message.text}</ItemDescription>
+                          <DebugOnly>
+                            <span className="text-xs text-muted-foreground tabular-nums">
+                              {message.reason} {formatPercent(message.probability ?? 0)}
+                            </span>
+                          </DebugOnly>
+                        </ItemContent>
+                        <ItemActions>
+                          <Button size="icon-xs" variant="outline" aria-label="Approve" onClick={() => setStatus(message.id, "approved")}>
+                            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
+                          </Button>
+                          <Button size="icon-xs" variant="destructive" aria-label="Remove" onClick={() => setStatus(message.id, "removed")}>
+                            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                          </Button>
+                        </ItemActions>
+                      </Item>
+                    ))}
+                  </ItemGroup>
+                )}
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="rules">
+              <ScrollArea className={panelHeight}>
+                <div className="flex flex-col gap-4">
+                  {rules.map((rule) => (
+                    <Field key={rule.id} orientation="horizontal">
+                      <FieldContent>
+                        <FieldLabel htmlFor={`rule-${rule.id}`}>{rule.label}</FieldLabel>
+                        <FieldDescription className="line-clamp-2">{rule.text}</FieldDescription>
+                      </FieldContent>
+                      <Switch
+                        id={`rule-${rule.id}`}
+                        checked={rule.enabled}
+                        onCheckedChange={(enabled) =>
+                          setRules((prev) => prev.map((r) => (r.id === rule.id ? { ...r, enabled } : r)))
+                        }
+                      />
+                    </Field>
+                  ))}
+                  <form onSubmit={addRule}>
+                    <InputGroup>
+                      <InputGroupInput
+                        value={newRule}
+                        onChange={(e) => setNewRule(e.target.value)}
+                        placeholder="Add a rule in plain English…"
+                        aria-label="New rule"
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton type="submit" size="icon-xs" aria-label="Add rule">
+                          <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </form>
+                </div>
+              </ScrollArea>
+            </TabsContent>
           </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Channel rules</CardTitle>
-            <CardDescription>Written in plain English. Each one is a yes/no question.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {rules.map((rule) => (
-              <Field key={rule.id} orientation="horizontal">
-                <FieldContent>
-                  <FieldLabel htmlFor={`rule-${rule.id}`}>{rule.label}</FieldLabel>
-                  <FieldDescription className="line-clamp-2">{rule.text}</FieldDescription>
-                </FieldContent>
-                <Switch
-                  id={`rule-${rule.id}`}
-                  checked={rule.enabled}
-                  onCheckedChange={(enabled) =>
-                    setRules((prev) => prev.map((r) => (r.id === rule.id ? { ...r, enabled } : r)))
-                  }
-                />
-              </Field>
-            ))}
-            <form onSubmit={addRule}>
-              <InputGroup>
-                <InputGroupInput
-                  value={newRule}
-                  onChange={(e) => setNewRule(e.target.value)}
-                  placeholder="e.g. No self-promotion or links to other channels"
-                  aria-label="New rule"
-                />
-                <InputGroupAddon align="inline-end">
-                  <InputGroupButton type="submit" size="icon-xs" aria-label="Add rule">
-                    <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} />
-                  </InputGroupButton>
-                </InputGroupAddon>
-              </InputGroup>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Throughput</CardTitle>
-            <CardDescription>Batching keeps you under the early-access rate limit.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 tabular-nums">
-            <Progress size="sm" value={(perMinute / RATE_LIMIT) * 100}>
-              <ProgressLabel>
-                {perMinute} / {RATE_LIMIT.toLocaleString()} calls per minute
-              </ProgressLabel>
-            </Progress>
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <span>{avgBatch.toFixed(1)} messages per call</span>
-              <span>{last ? `${Math.round(last.latencyMs)} ms last call` : "no calls yet"}</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              One call every {WINDOW_MS / 1000} s is {60 / (WINDOW_MS / 1000)} calls a
-              minute per channel, so one key covers about{" "}
-              {Math.floor(RATE_LIMIT / (60 / (WINDOW_MS / 1000)))} busy channels.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+        </Tabs>
+      </Card>
     </div>
   )
 }

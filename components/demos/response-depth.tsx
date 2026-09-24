@@ -5,21 +5,23 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { PlayIcon } from "@hugeicons/core-free-icons"
 
 import { Badge } from "@/components/ui/badge"
-import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
 import {
   Card,
+  CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Progress, ProgressLabel } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
-import { JevMeta, ScoreMeter } from "@/components/jev/indicators"
+import { JevMeta } from "@/components/jev/indicators"
 import { useJevAction, type JevResult } from "@/hooks/use-jev"
 import { responseStyle } from "@/lib/jev/response-style"
 import { scoreOf } from "@/lib/jev/tiers"
+import { cn } from "@/lib/utils"
 
 const TECHNICAL = ["None", "Slight", "Some", "Technical", "Expert"]
 const DETAIL = ["One line", "Short", "Normal", "Thorough", "Step by step"]
@@ -105,9 +107,7 @@ export function ResponseDepth() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          Same bug, two people. Run both and compare the answers.
-        </p>
+        <p className="text-sm text-muted-foreground">Same bug, two people.</p>
         <Button
           onClick={() => {
             a.ask()
@@ -139,52 +139,83 @@ function DepthColumn({
   const busy = run.status === "scoring" || run.status === "streaming"
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>
-          Two Score questions: how technical is the writer, and how much detail
-          do they want?
-        </CardDescription>
+        <CardAction>
+          <Button variant="ghost" size="xs" onClick={ask} disabled={busy}>
+            Ask
+          </Button>
+        </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-3">
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           aria-label={`${title} message`}
-          rows={3}
+          rows={2}
+          className="min-h-0"
         />
-        <Button variant="outline" onClick={ask} disabled={busy} className="self-start">
-          Ask
-        </Button>
 
-        {run.status === "scoring" && <p className="shimmer text-sm">Jev is scoring…</p>}
+        <div className="grid grid-cols-2 gap-4">
+          <MiniScore label="Technical" score={technical?.score} levels={TECHNICAL} />
+          <MiniScore label="Detail wanted" score={detail?.score} levels={DETAIL} />
+        </div>
 
-        {technical && detail && run.style && (
-          <>
-            <ScoreMeter score={technical.score} levels={TECHNICAL} label="Technical" />
-            <ScoreMeter score={detail.score} levels={DETAIL} label="Detail wanted" />
-            <div className="flex flex-col gap-2 rounded-2xl border p-3">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                Code picked the style
-                <Badge>{run.style.label}</Badge>
-              </div>
-              <p className="font-mono text-xs">{run.style.instruction}</p>
-            </div>
-          </>
-        )}
+        <div className="flex min-h-10 items-start gap-2 rounded-2xl border px-3 py-2">
+          {run.style ? (
+            <>
+              <Badge className="shrink-0">{run.style.label}</Badge>
+              <p className="line-clamp-2 font-mono text-xs text-muted-foreground">
+                {run.style.instruction}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {run.status === "scoring" ? (
+                <span className="shimmer">Jev is scoring…</span>
+              ) : (
+                "Code picks a style from the two scores."
+              )}
+            </p>
+          )}
+        </div>
 
-        {(run.answer || run.status === "streaming") && (
-          <Bubble variant={run.status === "error" ? "destructive" : "muted"} className="max-w-full">
-            <BubbleContent className="whitespace-pre-wrap">
-              {run.answer || <span className="shimmer">Writing…</span>}
-            </BubbleContent>
-          </Bubble>
-        )}
+        <ScrollArea className="h-[max(12rem,calc(100svh-35rem))] rounded-2xl bg-muted/50">
+          <p
+            className={cn(
+              "p-4 text-sm leading-relaxed whitespace-pre-wrap",
+              run.status === "error" && "text-destructive",
+              !run.answer && "text-muted-foreground"
+            )}
+          >
+            {run.answer ||
+              (run.status === "streaming" ? <span className="shimmer">Writing…</span> : "The answer streams in here.")}
+          </p>
+        </ScrollArea>
       </CardContent>
       <CardFooter>
         <JevMeta result={run.jev} isLoading={run.status === "scoring"} />
       </CardFooter>
     </Card>
+  )
+}
+
+function MiniScore({
+  label,
+  score,
+  levels,
+}: {
+  label: string
+  score?: number
+  levels: string[]
+}) {
+  return (
+    <Progress size="sm" value={score == null ? 0 : (score / (levels.length - 1)) * 100}>
+      <ProgressLabel>{label}</ProgressLabel>
+      <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+        {score == null ? "–" : `${levels[Math.round(score)]} · ${score.toFixed(1)}`}
+      </span>
+    </Progress>
   )
 }

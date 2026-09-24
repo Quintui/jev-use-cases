@@ -157,11 +157,7 @@ export function ExpenseCategory() {
     <Card>
       <CardHeader>
         <CardTitle>Expense → category</CardTitle>
-        <CardDescription>
-          The cheap layers run first: an exact match, then your own history.
-          Jev only runs when both miss. If it isn&apos;t sure, the expense goes
-          to review instead of getting a guess.
-        </CardDescription>
+        <CardDescription>Dictionary → your history → Jev → review. Jev only runs when the cheap layers miss.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form onSubmit={add} className="flex flex-col gap-3 sm:flex-row">
@@ -234,7 +230,7 @@ export function ExpenseCategory() {
         </div>
 
         <ItemGroup className="gap-2">
-          {expenses.map((expense) => {
+          {expenses.slice(0, 4).map((expense) => {
             const category = expense.category ? categoryByKey[expense.category] : null
             return (
               <Item key={expense.id} size="xs" variant="muted">
@@ -253,8 +249,7 @@ export function ExpenseCategory() {
           })}
         </ItemGroup>
         <p className="text-xs text-muted-foreground">
-          Add a new title, fix its category, then type it again. This time the
-          history layer answers, and Jev isn&apos;t called at all.
+          Fix a category, then type the same title again: your history answers and Jev isn&apos;t called.
         </p>
       </CardContent>
       <CardFooter className="flex-wrap gap-2">

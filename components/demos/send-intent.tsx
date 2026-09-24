@@ -44,10 +44,10 @@ const SCHEDULE_AT = 0.7
 const OFFER_AT = 0.4
 
 const EXAMPLES = [
-  "Happy birthday Sam!! 🎉 hope you have the best day. Send tomorrow at 9",
-  "Good morning team 👋 standup in 5 min, link is pinned. Send tomorrow at 8:55",
-  "See you tomorrow at 9!",
-  "Can we move our call to tomorrow at 9? Something came up",
+  { label: "Birthday wish", text: "Happy birthday Sam!! 🎉 hope you have the best day. Send tomorrow at 9" },
+  { label: "Good morning", text: "Good morning team 👋 standup in 5 min, link is pinned. Send tomorrow at 8:55" },
+  { label: "See you", text: "See you tomorrow at 9!" },
+  { label: "Reschedule", text: "Can we move our call to tomorrow at 9? Something came up" },
 ]
 
 type Sent = { id: number; text: string; at: Date | null }
@@ -57,7 +57,7 @@ type Sent = { id: number; text: string; at: Date | null }
  * part: does the sender want this *delivered* then, or just mention it?
  */
 export function SendIntent() {
-  const [draft, setDraft] = React.useState(EXAMPLES[0])
+  const [draft, setDraft] = React.useState(EXAMPLES[0].text)
   const [sent, setSent] = React.useState<Sent[]>([
     { id: 1, text: "Morning! Slides are in the shared drive.", at: null },
   ])
@@ -84,15 +84,11 @@ export function SendIntent() {
     <Card>
       <CardHeader>
         <CardTitle>Send → Schedule</CardTitle>
-        <CardDescription>
-          If a message names a time, code parses the time. Jev then answers
-          one yes/no question: does the sender want it delivered at that time?
-          Only a confident yes changes the button.
-        </CardDescription>
+        <CardDescription>Code finds the time. Jev decides if the message is meant for that time.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <MessageScrollerProvider autoScroll>
-          <MessageScroller className="h-48 rounded-2xl bg-muted/50">
+          <MessageScroller className="h-40 rounded-2xl bg-muted/50">
             <MessageScrollerViewport>
               <MessageScrollerContent className="gap-3 p-4">
                 {sent.map((message) => (
@@ -171,8 +167,8 @@ export function SendIntent() {
 
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((example) => (
-            <Button key={example} variant="outline" size="xs" onClick={() => setDraft(example)}>
-              {example}
+            <Button key={example.label} variant="outline" size="xs" onClick={() => setDraft(example.text)}>
+              {example.label}
             </Button>
           ))}
         </div>

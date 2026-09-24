@@ -1,4 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Table,
   TableBody,
@@ -7,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PageHeader } from "@/components/jev/page-header"
+import { NoteSection, PageHeader } from "@/components/jev/page-header"
 import { Moderation } from "@/components/demos/moderation"
 
 const ACTIONS = [
@@ -20,42 +19,50 @@ export default function ModerationPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Segment 6"
         title="Twitch chat moderation"
-        description="For each message in the window: is it hostile (Noul)? How severe (Score)? Does it break each channel rule (Noul per rule)? All messages in the window share one call."
+        description="Per message: hostile? how severe? breaks a channel rule? A whole window of chat in one call."
         primitives={["Noul", "Score"]}
+        notes={
+          <>
+            <NoteSection title="Graduated actions">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Confidence</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ACTIONS.map((row) => (
+                    <TableRow key={row.tier}>
+                      <TableCell className="font-medium text-foreground">{row.tier}</TableCell>
+                      <TableCell className="whitespace-normal">{row.action}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </NoteSection>
+            <NoteSection title="Rules a word filter can't express">
+              <p>
+                A word filter can&apos;t tell a spoiler from a guess, backseating
+                from a question, or &ldquo;very entertaining 🙂&rdquo; from a
+                compliment. A plain-English rule becomes one more yes/no
+                question, with nothing to train. Turn a rule off to watch the
+                same messages go through.
+              </p>
+            </NoteSection>
+            <NoteSection title="Batching and the rate limit">
+              <p>
+                Early access allows 1,200 requests a minute. One call every 1.5 s
+                is 40 calls a minute per channel, so one key covers about 30 busy
+                channels.
+              </p>
+            </NoteSection>
+          </>
+        }
       />
 
       <Moderation />
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Confidence</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ACTIONS.map((row) => (
-              <TableRow key={row.tier}>
-                <TableCell className="font-medium">{row.tier}</TableCell>
-                <TableCell className="whitespace-normal">{row.action}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Alert>
-          <AlertTitle>Rules a word filter can&apos;t express</AlertTitle>
-          <AlertDescription>
-            A word filter can&apos;t tell a spoiler from a guess, backseating
-            from a question, or &ldquo;very entertaining 🙂&rdquo; from a
-            compliment. A plain-English rule becomes one more yes/no question.
-            You don&apos;t need to train or fine-tune anything. Turn the rules
-            off to watch the same messages go through.
-          </AlertDescription>
-        </Alert>
-      </div>
     </>
   )
 }

@@ -30,9 +30,7 @@ export function CommandSearchCard() {
       <CardHeader>
         <CardTitle>Command search by intent</CardTitle>
         <CardDescription>
-          The palette works anywhere in this app. Name matches still come first
-          by spelling. Jev adds commands that match what you meant, and the
-          commands really run: the theme and sidebar ones change this page.
+          Press ⌘K anywhere. Jev adds commands that match what you meant, and they really run.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -44,9 +42,7 @@ export function CommandSearchCard() {
           ))}
         </div>
         <p className="text-sm text-muted-foreground">
-          The last two examples are in French and Spanish. They work without any
-          extra setup, as long as a live Jev key is configured. The keyword
-          fallback only understands English.
+          The last two are French and Spanish. They need live Jev; the keyword fallback only knows English.
         </p>
       </CardContent>
       <CardFooter>

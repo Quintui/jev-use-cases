@@ -46,6 +46,8 @@ import { cn } from "@/lib/utils"
 const settingsByKey = byKey(SETTINGS)
 const EXAMPLES = ["remove animations", "things are too flashy", "make it easier to read", "stop the beeping"]
 
+const MAX_ROWS = 5
+
 /** Segment 1a: settings search by intent. */
 export function SettingsSearch() {
   const [query, setQuery] = React.useState("")
@@ -71,12 +73,15 @@ export function SettingsSearch() {
   const jevKeys = new Set(ranked.map((r) => r.key))
   const keywordOnly = keywordResults.filter((s) => !jevKeys.has(s.key))
 
-  const rows: { setting: Setting; probability?: number }[] = trimmed
+  const allRows: { setting: Setting; probability?: number }[] = trimmed
     ? [
         ...ranked.map((r) => ({ setting: settingsByKey[r.key], probability: r.probability })),
         ...keywordOnly.map((setting) => ({ setting })),
       ]
     : SETTINGS.map((setting) => ({ setting }))
+  // Keep the list short so results never push below the fold.
+  const rows = allRows.slice(0, MAX_ROWS)
+  const hidden = allRows.length - rows.length
 
   function renderControl(setting: Setting) {
     if (setting.control === "slider") {
@@ -177,6 +182,9 @@ export function SettingsSearch() {
                 </ItemActions>
               </Item>
             ))}
+            {hidden > 0 && (
+              <p className="px-1 text-xs text-muted-foreground">+{hidden} more</p>
+            )}
           </ItemGroup>
         ) : (
           <Empty className="border">

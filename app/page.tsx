@@ -6,15 +6,7 @@ import {
   Target01Icon,
 } from "@hugeicons/core-free-icons"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   Item,
   ItemContent,
@@ -31,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { PageHeader } from "@/components/jev/page-header"
+import { NoteSection, PageHeader } from "@/components/jev/page-header"
 import { PrimitivesPlayground } from "@/components/demos/primitives-playground"
 import { TIERS } from "@/lib/jev/tiers"
 
@@ -39,7 +31,7 @@ const WHY = [
   {
     icon: FlashIcon,
     title: "Fast enough to run as you type",
-    description: "Vendor figures: ~70–500 ms, most around 100 ms from the US West Coast.",
+    description: "Vendor figures: ~70–500 ms. Measure your own; the header shows every round trip.",
   },
   {
     icon: Coins01Icon,
@@ -54,120 +46,97 @@ const WHY = [
   {
     icon: Target01Icon,
     title: "Every answer has a confidence value",
-    description: "That number is the key to good UI. See the tiers below.",
+    description: "That number is the key to good UI.",
   },
+]
+
+const TIER_ROWS = [
+  { badge: <Badge>High ≥ {TIERS.high}</Badge>, action: "Apply automatically, with undo" },
+  { badge: <Badge variant="secondary">Medium ≥ {TIERS.medium}</Badge>, action: "Suggest: a chip or “Did you mean”" },
+  { badge: <Badge variant="outline">Low</Badge>, action: "Do nothing, keep the normal UI" },
 ]
 
 export default function Page() {
   return (
     <>
       <PageHeader
-        eyebrow="Intro"
         title="Jev doesn't write text. It makes decisions."
-        description="You give it a state and questions, and it returns typed answers with probabilities. Nothing to parse, nothing to hallucinate."
+        description="State and questions in, typed answers with probabilities out. Jev decides, code does."
         primitives={["Choice", "Score", "Noul"]}
+        notes={
+          <>
+            <NoteSection title="The three primitives">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Primitive</TableHead>
+                    <TableHead>What it does</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><Badge variant="secondary">Choice</Badge></TableCell>
+                    <TableCell className="whitespace-normal">Picks one option from a set you define (up to 255)</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><Badge variant="secondary">Score</Badge></TableCell>
+                    <TableCell className="whitespace-normal">Places the input on an ordered scale (2–10 levels)</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><Badge variant="secondary">Noul</Badge></TableCell>
+                    <TableCell className="whitespace-normal">Yes/no question, returns P(yes)</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              <p>
+                In the AI SDK these are <code>choice</code>, <code>score</code> and{" "}
+                <code>boolean</code> questions in <code>experimental_evaluate</code>.
+              </p>
+            </NoteSection>
+            <NoteSection title="Why it fits micro-interactions">
+              <ItemGroup className="gap-2">
+                {WHY.map((item) => (
+                  <Item key={item.title} variant="muted" size="sm">
+                    <ItemMedia variant="icon">
+                      <HugeiconsIcon icon={item.icon} strokeWidth={2} />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{item.title}</ItemTitle>
+                      <ItemDescription>{item.description}</ItemDescription>
+                    </ItemContent>
+                  </Item>
+                ))}
+              </ItemGroup>
+            </NoteSection>
+            <NoteSection title="Jev decides, code does">
+              <p>
+                The model makes judgment calls. Deterministic code handles
+                anything with a correct answer: dates, math, rendering. Keyword
+                matching runs when the API is down, and the UI can&apos;t tell
+                the difference.
+              </p>
+            </NoteSection>
+          </>
+        }
       />
 
       <PrimitivesPlayground />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>The three primitives</CardTitle>
-            <CardDescription>
-              In the AI SDK these are <code>choice</code>, <code>score</code> and{" "}
-              <code>boolean</code> questions in <code>experimental_evaluate</code>.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Primitive</TableHead>
-                  <TableHead>What it does</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><Badge variant="secondary">Choice</Badge></TableCell>
-                  <TableCell className="whitespace-normal">Picks one option from a set you define (up to 255)</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><Badge variant="secondary">Score</Badge></TableCell>
-                  <TableCell className="whitespace-normal">Places the input on an ordered scale (2–10 levels)</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><Badge variant="secondary">Noul</Badge></TableCell>
-                  <TableCell className="whitespace-normal">Yes/no question, returns P(yes)</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Confidence tiers</CardTitle>
-            <CardDescription>
-              The core UI pattern. Every demo in this app uses it.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Confidence</TableHead>
-                  <TableHead>UI behavior</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell><Badge>High ≥ {TIERS.high}</Badge></TableCell>
-                  <TableCell>Apply automatically, with undo</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><Badge variant="secondary">Medium ≥ {TIERS.medium}</Badge></TableCell>
-                  <TableCell>Suggestion chip or &ldquo;Did you mean&rdquo;</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell><Badge variant="outline">Low</Badge></TableCell>
-                  <TableCell>Do nothing, fall back to normal UI</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Why it fits micro-interactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ItemGroup className="grid gap-2 sm:grid-cols-2">
-            {WHY.map((item) => (
-              <Item key={item.title} variant="muted">
-                <ItemMedia variant="icon">
-                  <HugeiconsIcon icon={item.icon} strokeWidth={2} />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{item.title}</ItemTitle>
-                  <ItemDescription>{item.description}</ItemDescription>
-                </ItemContent>
-              </Item>
-            ))}
-          </ItemGroup>
-        </CardContent>
-      </Card>
-
-      <Alert>
-        <AlertTitle>Jev decides, code does.</AlertTitle>
-        <AlertDescription>
-          The model makes judgment calls. Deterministic code handles anything
-          with a correct answer: dates, math, rendering. Keyword matching runs
-          when the API is down, and the UI can&apos;t tell the difference.
-        </AlertDescription>
-      </Alert>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          The core UI pattern: every demo in this app uses these tiers
+        </h2>
+        <ItemGroup className="grid gap-3 md:grid-cols-3">
+          {TIER_ROWS.map((row, i) => (
+            <Item key={i} variant="outline" size="sm">
+              <ItemContent>
+                <ItemTitle>{row.badge}</ItemTitle>
+                <ItemDescription>{row.action}</ItemDescription>
+              </ItemContent>
+            </Item>
+          ))}
+        </ItemGroup>
+      </section>
     </>
   )
 }

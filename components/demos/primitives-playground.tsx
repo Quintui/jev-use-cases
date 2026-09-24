@@ -45,10 +45,7 @@ export function PrimitivesPlayground() {
     <Card>
       <CardHeader>
         <CardTitle>One state, three questions, one call</CardTitle>
-        <CardDescription>
-          Type anything. Jev answers a Choice, a Score and a Noul together,
-          each with a probability.
-        </CardDescription>
+        <CardDescription>Type anything. Each answer comes with a probability.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">

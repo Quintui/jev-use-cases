@@ -18,7 +18,6 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
 import {
@@ -52,9 +51,7 @@ export function NoResultsSearch() {
     <Card>
       <CardHeader>
         <CardTitle>Search with no results</CardTitle>
-        <CardDescription>
-          The keyword search comes up empty, so Jev offers the nearest action by meaning.
-        </CardDescription>
+        <CardDescription>Keyword search finds nothing, so Jev offers the nearest action.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <InputGroup>
@@ -187,8 +184,7 @@ export function CliDidYouMean() {
           Failed command → nearest by meaning
         </CardTitle>
         <CardDescription>
-          Spelling-based suggestions can&apos;t map <code>git record</code> to{" "}
-          <code>git commit</code>. Meaning can.
+          <code>git record</code> → <code>git commit</code>, by meaning, not spelling.
         </CardDescription>
       </CardHeader>
       <CardContent>

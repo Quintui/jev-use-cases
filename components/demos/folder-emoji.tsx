@@ -41,6 +41,8 @@ import { cn } from "@/lib/utils"
 
 const emojiByKey = byKey(FOLDER_EMOJI)
 
+const EXAMPLES = ["Q3 sales reports", "Lisbon trip", "Grandma's recipes", "Stuff"]
+
 type Folder = { name: string; emoji: string; pickedByHand: boolean }
 
 /** Folder name → icon from a curated set, never overwriting a hand-picked one. */
@@ -77,10 +79,7 @@ export function FolderEmoji() {
     <Card>
       <CardHeader>
         <CardTitle>Folder name → icon</CardTitle>
-        <CardDescription>
-          Picks from about 30 curated icons as you type. Once you choose an
-          icon yourself, Jev stops touching it.
-        </CardDescription>
+        <CardDescription>Picks an icon as you type. Choose one yourself and Jev stops touching it.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form onSubmit={create} className="flex gap-2">
@@ -132,6 +131,21 @@ export function FolderEmoji() {
           </InputGroup>
           <Button type="submit">Create</Button>
         </form>
+        <div className="flex flex-wrap gap-2">
+          {EXAMPLES.map((example) => (
+            <Button
+              key={example}
+              variant="outline"
+              size="xs"
+              onClick={() => {
+                setName(example)
+                setManual(null)
+              }}
+            >
+              {example}
+            </Button>
+          ))}
+        </div>
         {ghost && (
           <p className="text-xs text-muted-foreground">
             Not sure enough to apply it. Showing {ghost} as a ghost preview.{" "}
@@ -141,7 +155,7 @@ export function FolderEmoji() {
           </p>
         )}
         <ItemGroup className="gap-2">
-          {folders.map((folder, i) => (
+          {folders.slice(0, 4).map((folder, i) => (
             <Item key={`${folder.name}-${i}`} size="xs" variant="muted">
               <ItemMedia className="text-lg">{folder.emoji}</ItemMedia>
               <ItemContent>

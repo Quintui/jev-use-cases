@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   const result = streamText({
     model,
-    instructions: `You are a helpful assistant. ${instruction}`,
+    instructions: `You are a helpful assistant. ${instruction} Write plain text without Markdown formatting (no headings, bold or code fences); indent code instead.`,
     prompt: message,
     abortSignal: request.signal,
   })
